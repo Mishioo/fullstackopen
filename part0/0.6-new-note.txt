@@ -1,0 +1,8 @@
+title 0.6: New note
+
+note over browser: User types in a new note\nand clicks "save" button
+
+note over browser: process recieved data\nand update DOM
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note\nnote=<text of the note>
+note over server: update notes on server
+server-->browser: {"message":"note created"}

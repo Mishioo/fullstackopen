@@ -1,0 +1,18 @@
+title POST notes
+
+note over browser: User types in a new note\nand clicks "save" button
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note\nnote=<text of the note>
+note over server: process recieved data
+server-->browser: redirect to /exampleapp/notes
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+server-->browser: HTML-code
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+server-->browser: main.css
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+server-->browser: main.js
+
+note over browser: browser executes js-code\nthat requests data
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+server-->browser: [{ content: "some note", date: "2019-09-25"}, ...]
+note over browser: notes are rendered by browser
