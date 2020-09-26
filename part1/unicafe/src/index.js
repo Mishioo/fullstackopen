@@ -9,7 +9,7 @@ const Button = ({ text, counter, setCounter }) => (
 const Statistic = ({ text, counter, unit }) => {
   if (Number.isNaN(counter)) counter = 0
   counter = Math.round((counter + Number.EPSILON) * 100) / 100
-  return <p>{text}: {counter} {unit || ''}</p>
+  return <tr><td>{text}:</td><td>{counter} {unit || ''}</td></tr>
 }
 
 const Statistics = ({ good, neutral, bad }) => {
@@ -18,14 +18,16 @@ const Statistics = ({ good, neutral, bad }) => {
     return <p>No feedback given</p>
   }
   return (
-    <div>
-      <Statistic text='good' counter={good} />
-      <Statistic text='neutral' counter={neutral} />
-      <Statistic text='bad' counter={bad} />
-      <Statistic text='all' counter={all} />
-      <Statistic text='average' counter={ (good - bad) / all } />
-      <Statistic text='positive' counter={ good * 100 / all } unit='%' />
-    </div>
+    <table>
+      <tbody>
+        <Statistic text='good' counter={good} />
+        <Statistic text='neutral' counter={neutral} />
+        <Statistic text='bad' counter={bad} />
+        <Statistic text='all' counter={all} />
+        <Statistic text='average' counter={ (good - bad) / all } />
+        <Statistic text='positive' counter={ good * 100 / all } unit='%' />
+      </tbody>
+    </table>
   )
 }
 
