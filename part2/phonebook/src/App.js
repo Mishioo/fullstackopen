@@ -1,4 +1,7 @@
 import React, { useState } from 'react'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -11,61 +14,21 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
   const [ filter, setFilter ] = useState('')
 
-  const addPerson = (event) => {
-    event.preventDefault()
-    const newPerson = { name: newName, number:newNumber }
-    if (persons.map(p => p.name).includes(newPerson.name)) {
-      window.alert(`${newName} is already added to phonebook`)
-      return
-    }
-    setPersons(persons.concat(newPerson))
-  }
-
-  const nameChanged = (event) => {
-    console.log('name value: ', event.target.value)
-    setNewName(event.target.value)
-  }
-  
-  const numberChanged = (event) => {
-    console.log('number value: ', event.target.value)
-    setNewNumber(event.target.value)
-  }
-
-  const searchFilter = (event) => {
-    console.log('filter value: ', event.target.value)
-    setFilter(event.target.value)
-  }
-
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with: <input value={filter} onChange={searchFilter} />
-      </div>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input value={newName} onChange={nameChanged} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={numberChanged} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      <table>
-        <tbody>
-          {persons.filter(p => p.name.includes(filter)).map(p => {
-            return (
-              <tr key={p.name}>
-                <td>{p.name}</td>
-                <td>{p.number}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+      <Filter filter={filter} setFilter={setFilter}/>
+      <h3>Addd new entry</h3>
+      <PersonForm
+        newName={newName}
+        newNumber={newNumber}
+        persons={persons}
+        setPersons={setPersons}
+        setNewName={setNewName}
+        setNewNumber={setNewNumber}
+        />
+      <h3>Numbers</h3>
+      <Persons persons={persons} filter={filter}/>
     </div>
   )
 }
