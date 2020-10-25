@@ -36,14 +36,16 @@ const App = () => {
           person => setPersons(persons.map(
             p => p.id !== person.id ? p : {...p, number:newNumber}
           ))
-        .then(() => {setInfoMessage(`Added ${newName} successfully.`)})
         )
-      } else if (personExists) {
+        .then(() => {setInfoMessage(`Added ${newName} successfully.`)})
+        .catch(error => setErrorMessage(error.response.data.error))
+      } else if (personExists) {  // user cancelled
         return
       } else {
         personsService.create(newPerson)
-        .then(person => setPersons(persons.concat(person)))
-        .then(() => {setInfoMessage(`Added ${newName} successfully.`)})
+          .then(person => setPersons(persons.concat(person)))
+          .then(() => {setInfoMessage(`Added ${newName} successfully.`)})
+          .catch(error => setErrorMessage(error.response.data.error))
     }
     setNewName('')
     setNewNumber('')
