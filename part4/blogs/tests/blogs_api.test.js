@@ -137,4 +137,52 @@ describe('/api/blogs/:id', () => {
   })
 })
 
+const bcrypt = require('bcrypt')
+const User = require('../models/user')
+const user = require('../models/user')
+
+describe('/api/users', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+    const passwordHash = await bcrypt.hash('secret password', 10)
+    const user = new User({ username: 'root', passwordHash })
+    await user.save()
+  })
+  describe('GET', async () => {
+    test('response as JSON', async () => {
+      api
+        .get('/api/users')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+    })
+    test('starting user is correct', async () => {
+      const usersAtStart = await helper.usersInDb()
+      const resp = await api.get('/api/users')
+      expect(resp.body.length).toBe(usersAtStart.length)
+      expect(resp.body[0].username).toBe('root')
+      expect(resp.body[0].passwordHash).not.toBeDefined()
+    })
+  })
+  describe('POST', async () => {
+    test('adding new valid user', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'mluukkai',
+        name: 'Matti Luukkainen',
+        password: 'salainen',
+      }
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+      const usersAtEnd = await helper.usersInDb()
+      expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+      const usernames = usersAtEnd.map(u => u.username)
+      expect(usernames).toContain(newUser.username)
+    })
+  })
+})
+
 afterAll(() => mongoose.connection.close())
