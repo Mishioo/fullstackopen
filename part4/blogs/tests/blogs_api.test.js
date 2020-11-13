@@ -139,7 +139,6 @@ describe('/api/blogs/:id', () => {
 
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
-const user = require('../models/user')
 
 describe('/api/users', () => {
   beforeEach(async () => {
@@ -148,12 +147,13 @@ describe('/api/users', () => {
     const user = new User({ username: 'root', passwordHash })
     await user.save()
   })
-  describe('GET', async () => {
-    test('response as JSON', async () => {
+  describe('GET', () => {
+    test('response as JSON', async ( done ) => {
       api
         .get('/api/users')
         .expect(200)
         .expect('Content-Type', /application\/json/)
+        .end(done)
     })
     test('starting user is correct', async () => {
       const usersAtStart = await helper.usersInDb()
@@ -163,7 +163,7 @@ describe('/api/users', () => {
       expect(resp.body[0].passwordHash).not.toBeDefined()
     })
   })
-  describe('POST', async () => {
+  describe('POST', () => {
     test('adding new valid user', async () => {
       const usersAtStart = await helper.usersInDb()
 
@@ -182,7 +182,84 @@ describe('/api/users', () => {
       const usernames = usersAtEnd.map(u => u.username)
       expect(usernames).toContain(newUser.username)
     })
+    describe('adding invalid user', () => {
+      test('no username', async () => {
+        const usersAtStart = await helper.usersInDb()
+        const newUser = {
+          name: 'Kobe Lnicky',
+          password: 'somepass',
+        }
+        await api
+          .post('/api/users')
+          .send(newUser)
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+        const usersAtEnd = await helper.usersInDb()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)
+      })
+      test('username too short', async () => {
+        const usersAtStart = await helper.usersInDb()
+        const newUser = {
+          username: 'q',
+          name: 'Kobe Lnicky',
+          password: 'somepass',
+        }
+        await api
+          .post('/api/users')
+          .send(newUser)
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+        const usersAtEnd = await helper.usersInDb()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)
+      })
+      test('username not unique', async () => {
+        const usersAtStart = await helper.usersInDb()
+        const newUser = {
+          username: 'root',
+          name: 'Kobe Lnicky',
+          password: 'somepass',
+        }
+        await api
+          .post('/api/users')
+          .send(newUser)
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+        const usersAtEnd = await helper.usersInDb()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)
+      })
+      test('no password', async () => {
+        const usersAtStart = await helper.usersInDb()
+        const newUser = {
+          username: 'kobe_12',
+          name: 'Kobe Lnicky',
+        }
+        await api
+          .post('/api/users')
+          .send(newUser)
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+        const usersAtEnd = await helper.usersInDb()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)
+      })
+      test('password too short', async () => {
+        const usersAtStart = await helper.usersInDb()
+        const newUser = {
+          username: 'kobe_12',
+          name: 'Kobe Lnicky',
+          password: 'p',
+        }
+        await api
+          .post('/api/users')
+          .send(newUser)
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+        const usersAtEnd = await helper.usersInDb()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)
+      })
+    })
   })
 })
 
-afterAll(() => mongoose.connection.close())
+afterAll(() => {
+  mongoose.connection.close()
+})

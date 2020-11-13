@@ -9,6 +9,8 @@ const errorHandler = (error, req, resp, next) => {
     return resp.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
     return resp.status(400).send({ error: error.message })
+  } else if (error.message.startsWith('Password ')) {
+    return resp.status(400).send({ error: error.message })
   }
 
   next(error)
