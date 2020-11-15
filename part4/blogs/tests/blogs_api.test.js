@@ -7,14 +7,24 @@ const api = supertest(app)
 const Blog = require('../models/blog')
 const { initialBlogs } = require('./test_helper')
 
+let ROOT_ID = undefined
 
 beforeEach(async () => {
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash('secret password', 10)
+  const user = new User({ username: 'root', passwordHash })
+  await user.save()
+  ROOT_ID = user._id.toString()
+
   await Blog.deleteMany({})
 
   const blogObjects = helper.initialBlogs
-    .map(blog => new Blog(blog))
+    .map(blog => new Blog({ ...blog, user: ROOT_ID }))
   const promiseArray = blogObjects.map(blog => blog.save())
   await Promise.all(promiseArray)
+
+  user.blogs = blogObjects.map(blog => blog._id)
+  await user.save()
 })
 
 describe('/api/blogs', () => {
@@ -32,6 +42,7 @@ describe('/api/blogs', () => {
     test('returned entries contain id field', async () => {
       const resp = await api.get('/api/blogs')
       expect(resp.body[0].id).toBeDefined()
+      expect(resp.body[0].user.id).toEqual(ROOT_ID)
     })
   })
   describe('POST', () => {
@@ -40,7 +51,8 @@ describe('/api/blogs', () => {
         title: 'New blog entry for testing!',
         author: 'Besty Blogger',
         url: 'http://www.definitellyrealblog.com',
-        likes: 42
+        likes: 42,
+        user: ROOT_ID,
       }
       await api
         .post('/api/blogs')
@@ -52,6 +64,8 @@ describe('/api/blogs', () => {
 
       expect(resp.body).toHaveLength(initialBlogs.length + 1)
       expect(titles).toContain('New blog entry for testing!')
+      const user = await User.findById(ROOT_ID)
+      expect(user.blogs.length).toBe(initialBlogs.length + 1)
     })
     test('default value for likes field is added', async () => {
       const newBlog = {
@@ -105,6 +119,7 @@ describe('/api/blogs/:id', () => {
       const blog = await Blog.findOne({})
       const result = await api.get(`/api/blogs/${blog._id}`)
       expect(result.body.title).toBe(blog.title)
+      expect(result.body.user.id).toEqual(ROOT_ID)
     })
   })
   describe('DELETE', () => {
@@ -141,12 +156,6 @@ const bcrypt = require('bcrypt')
 const User = require('../models/user')
 
 describe('/api/users', () => {
-  beforeEach(async () => {
-    await User.deleteMany({})
-    const passwordHash = await bcrypt.hash('secret password', 10)
-    const user = new User({ username: 'root', passwordHash })
-    await user.save()
-  })
   describe('GET', () => {
     test('response as JSON', async ( done ) => {
       api
@@ -161,6 +170,7 @@ describe('/api/users', () => {
       expect(resp.body.length).toBe(usersAtStart.length)
       expect(resp.body[0].username).toBe('root')
       expect(resp.body[0].passwordHash).not.toBeDefined()
+      expect(resp.body[0].blogs.length).toBe(initialBlogs.length)
     })
   })
   describe('POST', () => {
