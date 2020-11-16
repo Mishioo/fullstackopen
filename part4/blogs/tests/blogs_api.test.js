@@ -1,20 +1,34 @@
 const supertest = require('supertest')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
 const helper = require('./test_helper')
 const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
 const { initialBlogs } = require('./test_helper')
+const bcrypt = require('bcrypt')
+const User = require('../models/user')
+const config = require('../utils/config')
+
 
 let ROOT_ID = undefined
+let ROOT_TOKEN = undefined
+let NEW_BLOG = undefined
+let ROOT_PASSWORD = 'secret password'
+
 
 beforeEach(async () => {
   await User.deleteMany({})
-  const passwordHash = await bcrypt.hash('secret password', 10)
+  const passwordHash = await bcrypt.hash(ROOT_PASSWORD, 10)
   const user = new User({ username: 'root', passwordHash })
   await user.save()
   ROOT_ID = user._id.toString()
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  }
+  ROOT_TOKEN = jwt.sign(userForToken, config.SECRET)
 
   await Blog.deleteMany({})
 
@@ -25,38 +39,47 @@ beforeEach(async () => {
 
   user.blogs = blogObjects.map(blog => blog._id)
   await user.save()
+
+  NEW_BLOG = {
+    title: 'New blog entry for testing!',
+    author: 'Besty Blogger',
+    url: 'http://www.definitellyrealblog.com',
+    likes: 42,
+    user: ROOT_ID,
+  }
 })
+
 
 describe('/api/blogs', () => {
   describe('GET', () => {
+
     test('returned blogs are JSON', async () => {
       await api
         .get('/api/blogs')
         .expect(200)
         .expect('Content-Type', /application\/json/)
     })
+
     test('number of blogs is correct', async () => {
       const resp = await api.get('/api/blogs')
       expect(resp.body).toHaveLength(helper.initialBlogs.length)
     })
+
     test('returned entries contain id field', async () => {
       const resp = await api.get('/api/blogs')
       expect(resp.body[0].id).toBeDefined()
       expect(resp.body[0].user.id).toEqual(ROOT_ID)
     })
   })
+
+
   describe('POST', () => {
-    test('adding valid entry', async () => {
-      const newBlog = {
-        title: 'New blog entry for testing!',
-        author: 'Besty Blogger',
-        url: 'http://www.definitellyrealblog.com',
-        likes: 42,
-        user: ROOT_ID,
-      }
+
+    test('valid entry', async () => {
       await api
         .post('/api/blogs')
-        .send(newBlog)
+        .set('Authorization', `Bearer ${ROOT_TOKEN}`)
+        .send(NEW_BLOG)
         .expect(201)
         .expect('Content-Type', /application\/json/)
       const resp = await api.get('/api/blogs')
@@ -67,46 +90,53 @@ describe('/api/blogs', () => {
       const user = await User.findById(ROOT_ID)
       expect(user.blogs.length).toBe(initialBlogs.length + 1)
     })
+
+    test('unauthorized', async () => {
+      await api
+        .post('/api/blogs')
+        .send(NEW_BLOG)
+        .expect(401)
+        .expect('Content-Type', /application\/json/)
+      const resp = await api.get('/api/blogs')
+      expect(resp.body).toHaveLength(initialBlogs.length)
+    })
+
     test('default value for likes field is added', async () => {
-      const newBlog = {
-        title: 'Missing likes and how to find them',
-        author: 'Besty Blogger',
-        url: 'http://www.definitellyrealblog.com',
-      }
+      delete NEW_BLOG.likes
       const resp = await api
         .post('/api/blogs')
-        .send(newBlog)
+        .set('Authorization', `Bearer ${ROOT_TOKEN}`)
+        .send(NEW_BLOG)
         .expect(201)
         .expect('Content-Type', /application\/json/)
       expect(resp.body.likes).toBeDefined()
       expect(resp.body.likes).toBe(0)
     })
+
     test('missing url causes code 400', async () => {
-      const newBlog = {
-        title: 'you won\'t get enywhere without url',
-        author: 'Besty Blogger',
-        likes: 1,
-      }
+      delete NEW_BLOG.url
       await api
         .post('/api/blogs')
-        .send(newBlog)
+        .set('Authorization', `Bearer ${ROOT_TOKEN}`)
+        .send(NEW_BLOG)
         .expect(400)
     })
+
     test('missing title causes code 400', async () => {
-      const newBlog = {
-        author: 'Besty Blogger',
-        url: 'http://www.titlessblog.com',
-        likes: 1,
-      }
+      delete NEW_BLOG.title
       await api
         .post('/api/blogs')
-        .send(newBlog)
+        .set('Authorization', `Bearer ${ROOT_TOKEN}`)
+        .send(NEW_BLOG)
         .expect(400)
     })
   })
 })
 
+
 describe('/api/blogs/:id', () => {
+
+
   describe('GET', () => {
     test('return value is JSON', async () => {
       const blog = await Blog.findOne({})
@@ -122,24 +152,42 @@ describe('/api/blogs/:id', () => {
       expect(result.body.user.id).toEqual(ROOT_ID)
     })
   })
+
+
   describe('DELETE', () => {
+
     test('non existant', async () => {
       await api
         .delete(`/api/blogs/${await helper.nonExistingId()}`)
+        .set('Authorization', `Bearer ${ROOT_TOKEN}`)
         .expect(204)
     })
+
     test('check if actually deleted', async () => {
-      const blog = new Blog({ title: 'notitle', author: 'noauthor', url: 'nourl', likes: 1 })
+      const blog = new Blog(NEW_BLOG)
       await blog.save()
       const id = blog._id.toString()
       await api
         .delete(`/api/blogs/${id}`)
+        .set('Authorization', `Bearer ${ROOT_TOKEN}`)
         .expect(204)
       const ids = (await helper.entriesInDb()).map(blog => blog.id)
       expect(ids).not.toContain(id)
     })
+
+    test('unauthorized', async () => {
+      const blog = new Blog(NEW_BLOG)
+      await blog.save()
+      const id = blog._id.toString()
+      await api
+        .delete(`/api/blogs/${id}`)
+        .expect(401)
+    })
   })
+
+
   describe('PUT', () => {
+
     test('changes number of likes', async () => {
       const blog = await Blog.findOne({})
       const result = await api
@@ -152,13 +200,11 @@ describe('/api/blogs/:id', () => {
   })
 })
 
-const bcrypt = require('bcrypt')
-const User = require('../models/user')
 
 describe('/api/users', () => {
   describe('GET', () => {
     test('response as JSON', async ( done ) => {
-      api
+      await api
         .get('/api/users')
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -267,6 +313,27 @@ describe('/api/users', () => {
         expect(usersAtEnd).toHaveLength(usersAtStart.length)
       })
     })
+  })
+})
+
+
+describe('/api/login', () => {
+  test('correct password', async () => {
+    const resp = await api
+      .post('/api/login')
+      .send({ username: 'root', password: ROOT_PASSWORD })
+      .expect(200)
+    const token = resp.body.token
+    expect(token).toBeDefined()
+    const decoded = jwt.verify(token, config.SECRET)
+    expect(decoded.username).toEqual('root')
+    expect(decoded.id).toEqual(ROOT_ID)
+  })
+  test('wrong password', async () => {
+    await api
+      .post('/api/login')
+      .send({ username: 'root', password: 'wrong pass' })
+      .expect(401)
   })
 })
 
