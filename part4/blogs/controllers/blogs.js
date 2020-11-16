@@ -53,7 +53,9 @@ blogsRouter.delete('/:id', async (request, response) => {
   if (!blog) {
     return response.send(204).end()
   } else if (user._id.toString() === blog.user.toString()) {
-    await Blog.findByIdAndDelete(id)
+    await blog.remove()
+    user.blogs = user.blogs.filter(b => b.id.toString() !== id.toString())
+    await user.save()
     return response.send(204).end()
   } else if (blog) {
     return response.status(401).json({ error: 'unauthorized' })
