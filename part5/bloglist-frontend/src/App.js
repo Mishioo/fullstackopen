@@ -54,7 +54,7 @@ const App = () => {
           setUser={setUser}
         />}
       {user !== null &&
-        <Togglable buttonLabel='new note' ref={blogFormRef}>
+        <Togglable buttonLabel='new blog' ref={blogFormRef}>
           <BlogForm blogs={blogs} setBlogs={setBlogs} blogFormRef={blogFormRef} />
         </Togglable>
       }
