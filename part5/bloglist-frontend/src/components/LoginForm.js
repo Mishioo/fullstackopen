@@ -1,5 +1,6 @@
 import React from 'react'
 import loginService from '../services/login'
+import blogService from '../services/blogs'
 
 
 const LoginForm = ({ username, setUsername, password, setPassword, setUser }) => {
@@ -9,10 +10,11 @@ const LoginForm = ({ username, setUsername, password, setPassword, setUser }) =>
       const user = await loginService.login({
         username, password
       })
+      blogService.setToken(user.token)
+      window.localStorage.setItem('loggedUser', JSON.stringify(user))
       setUser(user)
       setUsername('')
       setPassword('')
-      window.localStorage.setItem('loggedUser', user.toString())
     } catch (exception) {
       console.log('Invalid credentials')
     }
