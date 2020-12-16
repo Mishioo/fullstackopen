@@ -61,7 +61,7 @@ const App = () => {
       {user !== null &&
         blogs
           .filter(blog => blog.user.username === user.username)
-          .map(blog => <Blog key={blog.id} blog={blog} />)
+          .map(blog => <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} />)
       }
     </div>
   )

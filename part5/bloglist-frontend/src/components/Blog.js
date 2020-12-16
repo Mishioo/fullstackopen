@@ -1,13 +1,36 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import blogService from '../services/blogs'
+import notificationService from '../services/notifications'
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, blogs, setBlogs }) => {
   const [visible, setVisible] = useState(false)
+  const [likes, setLikes] = useState(0)
 
   const hideWhenVisible = { display: visible ? 'none' : '' }
   const showWhenVisible = { display: visible ? '' : 'none' }
 
+  useEffect(() => setLikes(blog.likes), [])
+
   const toggleVisibility = () => {
     setVisible(!visible)
+  }
+
+  const addLike = async () => {
+    const updated = {
+      title: blog.title,
+      author: blog.author,
+      likes: blog.likes + 1,
+      user: blog.user.id,
+      url: blog.url,
+    }
+    try {
+      const updatedBlog = await blogService.update(blog.id, updated)
+      setLikes(updatedBlog.likes)
+      setBlogs(blogs.map(b => (b.id === updatedBlog.id ? updatedBlog : b)))
+    } catch (err) {
+      notificationService.error('Could not process your like.')
+      console.error(err)
+    }
   }
 
   const blogStyle = {
@@ -27,7 +50,7 @@ const Blog = ({ blog }) => {
       <div style={showWhenVisible}>
         {blog.url}
         <br />
-        {`likes ${blog.likes} `} <button>like</button>
+        {`likes ${likes} `} <button onClick={addLike} >like</button>
         {' '}
         <button onClick={toggleVisibility}>hide</button>
       </div>
