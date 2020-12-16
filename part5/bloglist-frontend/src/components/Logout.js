@@ -1,9 +1,12 @@
 import React from 'react'
+import notificationService from '../services/notifications'
+
 
 const Logout = ({ user, setUser }) => {
     const logoutAction = () => {
         window.localStorage.removeItem('loggedUser')
         setUser(null)
+        notificationService.info('Logout successful.')
     }
     return (
         <p>

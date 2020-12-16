@@ -1,6 +1,7 @@
 import React from 'react'
 import loginService from '../services/login'
 import blogService from '../services/blogs'
+import notificationService from '../services/notifications'
 
 
 const LoginForm = ({ username, setUsername, password, setPassword, setUser }) => {
@@ -15,8 +16,10 @@ const LoginForm = ({ username, setUsername, password, setPassword, setUser }) =>
       setUser(user)
       setUsername('')
       setPassword('')
+      notificationService.info(`Welcome, ${user.name || user.username}.`)
     } catch (exception) {
       console.log('Invalid credentials')
+      notificationService.error('Invalid credentials')
     }
   }
   return (

@@ -1,5 +1,6 @@
 import React from 'react'
 import blogService from '../services/blogs'
+import notificationService from '../services/notifications'
 
 const BlogForm = ({
   newTitle, setTitle,
@@ -17,8 +18,10 @@ const BlogForm = ({
       setAuthor('')
       setUrl('')
       setBlogs(blogs.concat(newBlog))
+      notificationService.info(`New blog created: ${newTitle} by ${newAuthor}.`)
     } catch (err) {
       console.log('cannot create new blog entry')
+      notificationService.error('Cannot create new blog, some error occurred.')
     }
   }
   return (
