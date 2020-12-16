@@ -50,7 +50,7 @@ const Blog = ({ blog, blogs, setBlogs }) => {
     borderWidth: 1,
     marginBottom: 5
   }
-  
+
   return (
     <div style={blogStyle}>
       <div style={hideWhenVisible}>

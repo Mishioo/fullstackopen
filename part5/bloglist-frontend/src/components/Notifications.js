@@ -36,4 +36,4 @@ const ErrorNotification = ({ message, setter }) => {
   return getNotification(message, notificationStyle, setter)
 }
 
-export {InfoNotification, ErrorNotification}
+export { InfoNotification, ErrorNotification }
