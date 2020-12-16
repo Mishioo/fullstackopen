@@ -29,6 +29,20 @@ const Blog = ({ blog, blogs, setBlogs }) => {
     }
   }
 
+  const removeBlog = () => {
+    const confirm = window.confirm('Are you sure? It will be lost forever!')
+    if (confirm) {
+      try {
+        blogService.remove(blog.id)
+        setBlogs(blogs.filter(b => (b.id !== blog.id)))
+        notificationService.info(`Blog '${blog.title}' by ${blog.author} removed.`)
+      } catch (err) {
+        notificationService.error('Something went wrong! :(')
+        console.error(err)
+      }
+    }
+  }
+
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -39,16 +53,19 @@ const Blog = ({ blog, blogs, setBlogs }) => {
   
   return (
     <div style={blogStyle}>
-        {blog.title} -- {blog.author}
       <div style={hideWhenVisible}>
+        {blog.title} -- {blog.author} {' '}
         <button onClick={toggleVisibility}>view</button>
       </div>
       <div style={showWhenVisible}>
+        {blog.title} -- {blog.author} {' '}
+        <button onClick={toggleVisibility}>hide</button>
+        <br />
         {blog.url}
         <br />
         {`likes ${blog.likes} `} <button onClick={addLike} >like</button>
-        {' '}
-        <button onClick={toggleVisibility}>hide</button>
+        <br />
+        <button onClick={removeBlog}>remove</button>
       </div>
     </div>
   )
