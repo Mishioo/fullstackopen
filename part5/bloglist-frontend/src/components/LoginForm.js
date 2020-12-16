@@ -12,6 +12,7 @@ const LoginForm = ({ username, setUsername, password, setPassword, setUser }) =>
       setUser(user)
       setUsername('')
       setPassword('')
+      window.localStorage.setItem('loggedUser', user.toString())
     } catch (exception) {
       console.log('Invalid credentials')
     }
