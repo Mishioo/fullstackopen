@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Logout from './components/Logout'
@@ -7,6 +6,7 @@ import blogService from './services/blogs'
 import notificationService from './services/notifications'
 import { ErrorNotification, InfoNotification } from './components/Notifications'
 import Togglable from './components/Togglable'
+import BlogList from './components/BlogList'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -58,11 +58,7 @@ const App = () => {
           <BlogForm blogs={blogs} setBlogs={setBlogs} blogFormRef={blogFormRef} />
         </Togglable>
       }
-      {user !== null &&
-        blogs
-          .filter(blog => blog.user.username === user.username)
-          .map(blog => <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} />)
-      }
+      {user !== null && <BlogList user={user} blogs={blogs} setBlogs={setBlogs} />}
     </div>
   )
 }
