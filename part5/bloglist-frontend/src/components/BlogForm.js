@@ -20,7 +20,7 @@ const BlogForm = ({ blogs, setBlogs, blogFormRef }) => {
       setBlogs(blogs.concat(newBlog))
       notificationService.info(`New blog created: ${newTitle} by ${newAuthor}.`)
     } catch (err) {
-      console.log('cannot create new blog entry')
+      console.error('cannot create new blog entry: ', err)
       notificationService.error('Cannot create new blog, some error occurred.')
     }
   }
