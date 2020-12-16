@@ -1,16 +1,16 @@
-import React from 'react'
+import React, { useState } from 'react'
 import blogService from '../services/blogs'
 import notificationService from '../services/notifications'
 
-const BlogForm = ({
-  newTitle, setTitle,
-  newAuthor, setAuthor,
-  newUrl, setUrl,
-  blogs, setBlogs  
-}) => {
+const BlogForm = ({ blogs, setBlogs, blogFormRef }) => {
+  const [newTitle, setTitle] = useState('')
+  const [newAuthor, setAuthor] = useState('')
+  const [newUrl, setUrl] = useState('')
+
   const addBlog = async (event) => {
+    event.preventDefault()
+    blogFormRef.current.toggleVisibility()
     try {
-      event.preventDefault()
       const newBlog = await blogService.create({
         title: newTitle, author: newAuthor, url: newUrl
       })
@@ -24,6 +24,7 @@ const BlogForm = ({
       notificationService.error('Cannot create new blog, some error occurred.')
     }
   }
+  
   return (
     <div>
       <h3>create new</h3>
