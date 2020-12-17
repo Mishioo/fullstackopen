@@ -52,12 +52,12 @@ const Blog = ({ blog, blogs, setBlogs }) => {
   }
 
   return (
-    <div style={blogStyle}>
-      <div style={hideWhenVisible}>
+    <div style={blogStyle} className='blog'>
+      <div style={hideWhenVisible} className='blogHeader'>
         {blog.title} -- {blog.author} {' '}
         <button onClick={toggleVisibility}>view</button>
       </div>
-      <div style={showWhenVisible}>
+      <div style={showWhenVisible} className='blogDetails'>
         {blog.title} -- {blog.author} {' '}
         <button onClick={toggleVisibility}>hide</button>
         <br />
