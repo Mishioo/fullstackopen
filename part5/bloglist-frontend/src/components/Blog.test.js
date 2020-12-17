@@ -41,3 +41,15 @@ test('blog expanded', () => {
   const detailsDiv = component.container.querySelector('.blogDetails')
   expect(detailsDiv).not.toHaveStyle('display: none')
 })
+
+test('clicking like button', () => {
+  const mockHandler = jest.fn()
+  component = render(
+    <Blog blog={BLOG} likeHandler={mockHandler} />
+  )
+  const button = component.getByText('like')
+  fireEvent.click(button)
+  fireEvent.click(button)
+
+  expect(mockHandler.mock.calls).toHaveLength(2)
+})
