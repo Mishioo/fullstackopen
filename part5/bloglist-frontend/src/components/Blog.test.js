@@ -47,7 +47,7 @@ test('clicking like button', () => {
   component = render(
     <Blog blog={BLOG} likeHandler={mockHandler} />
   )
-  const button = component.getByText('like')
+  const button = component.container.querySelector('.likeButton')
   fireEvent.click(button)
   fireEvent.click(button)
 

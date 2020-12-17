@@ -36,6 +36,21 @@ const App = () => {
     }
   }, [])
 
+  const createBlog = async ({ newTitle, newAuthor, newUrl }) => {
+    try {
+      const newBlog = await blogService.create({
+        title: newTitle, author: newAuthor, url: newUrl
+      })
+      setBlogs(blogs.concat(newBlog))
+      notificationService.info(`New blog created: ${newTitle} by ${newAuthor}.`)
+    } catch (err) {
+      console.error('cannot create new blog entry: ', err)
+      notificationService.error('Cannot create new blog, some error occurred.')
+    } finally {
+      blogFormRef.current.toggleVisibility()
+    }
+  }
+
   return (
     <div>
       <h2>blogs</h2>
@@ -55,7 +70,7 @@ const App = () => {
         />}
       {user !== null &&
         <Togglable buttonLabel='new blog' ref={blogFormRef}>
-          <BlogForm blogs={blogs} setBlogs={setBlogs} blogFormRef={blogFormRef} />
+          <BlogForm createBlog={createBlog} />
         </Togglable>
       }
       {user !== null && <BlogList user={user} blogs={blogs} setBlogs={setBlogs} />}
