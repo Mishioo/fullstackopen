@@ -72,7 +72,7 @@ describe('Blog app', function() {
         cy.get('@blog').should('not.exist')
       })
 
-      it.only('blogs are ordered by likes', function () {
+      it('blogs are ordered by likes', function () {
         cy
           .get('.blog-likes')
           .then($items => {
