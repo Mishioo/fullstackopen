@@ -73,11 +73,18 @@ describe('Blog app', function() {
       })
 
       it('blogs are ordered by likes', function () {
-        cy.get('.blog-likes')
-        .then($items => {
-          return $items.map((index, html) => Cypress.$(html).text()).get()
-        })
-        .should('deep.eq', ['likes 8', 'likes 5', 'likes 2'])
+        cy
+          .get('.blog-likes')
+          .then($items => {
+            return $items.map((index, html) => Cypress.$(html).text()).get()
+          })
+          .then($items => {
+            return $items.map((index, text) => parseInt(text.match(/\d+/)))
+          })
+          .then($items => {
+            return $items.reduce((a,v) => (a!==false) && (a >= v) ? v : false, +Infinity)
+          })
+          .should('not.be.false')
   
       })
     })
