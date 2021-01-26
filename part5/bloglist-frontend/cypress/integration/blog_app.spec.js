@@ -50,7 +50,7 @@ describe('Blog app', function() {
       cy.get('.info').contains('New blog created')
     })
 
-    describe.only('and several notes exist', function () {
+    describe('and several notes exist', function () {
       beforeEach(function () {
         cy.createBlog({ title: 'first blog', author: 'first author', url: 'http://first.url', likes: 5 })
         cy.createBlog({ title: 'second blog', author: 'second author', url: 'http://second.url', likes: 2 })
@@ -72,20 +72,19 @@ describe('Blog app', function() {
         cy.get('@blog').should('not.exist')
       })
 
-      it('blogs are ordered by likes', function () {
+      it.only('blogs are ordered by likes', function () {
         cy
           .get('.blog-likes')
           .then($items => {
             return $items.map((index, html) => Cypress.$(html).text()).get()
           })
           .then($items => {
-            return $items.map((index, text) => parseInt(text.match(/\d+/)))
+            return $items.map((index, text) => parseInt(text.toString().match(/\d+/)))
           })
           .then($items => {
             return $items.reduce((a,v) => (a!==false) && (a >= v) ? v : false, +Infinity)
           })
-          .should('not.be.false')
-  
+          .should('not.be', false)
       })
     })
   })
