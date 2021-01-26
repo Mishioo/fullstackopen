@@ -71,6 +71,15 @@ describe('Blog app', function() {
         cy.get('@blog').parent().contains('remove').click()
         cy.get('@blog').should('not.exist')
       })
+
+      it('blogs are ordered by likes', function () {
+        cy.get('.blog-likes')
+        .then($items => {
+          return $items.map((index, html) => Cypress.$(html).text()).get()
+        })
+        .should('deep.eq', ['likes 8', 'likes 5', 'likes 2'])
+  
+      })
     })
   })
 })
