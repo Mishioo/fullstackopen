@@ -50,7 +50,7 @@ describe('Blog app', function() {
       cy.get('.info').contains('New blog created')
     })
 
-    describe('and several notes exist', function () {
+    describe.only('and several notes exist', function () {
       beforeEach(function () {
         cy.createBlog({ title: 'first blog', author: 'first author', url: 'http://first.url', likes: 5 })
         cy.createBlog({ title: 'second blog', author: 'second author', url: 'http://second.url', likes: 2 })
@@ -58,15 +58,18 @@ describe('Blog app', function() {
       })
 
       it('blog can be liked', function () {
-        cy.contains('first blog').parent().get('.likeButton').as('likeButton')
+        cy.contains('first blog').as('blog')
+        cy.get('@blog').find('button').click()
+        cy.get('@blog').parent().find('.likeButton').as('likeButton')
         cy.get('@likeButton').click()
         cy.get('@likeButton').parent().contains('likes 6')
       })
 
       it('blog can be deleted', function () {
-        cy.contains('first blog').parent().find('remove').click()
-        cy.contains('first blog').should('not.exist')
-
+        cy.contains('first blog').as('blog')
+        cy.get('@blog').find('button').click()
+        cy.get('@blog').parent().contains('remove').click()
+        cy.get('@blog').should('not.exist')
       })
     })
   })
