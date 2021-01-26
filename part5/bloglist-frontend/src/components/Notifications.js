@@ -1,10 +1,10 @@
 import React from 'react'
 
-const getNotification = (message, style, setter) => {
+const getNotification = (message, style, setter, className) => {
   if (message) {
     setTimeout(() => setter(null), 5000)
     return (
-      <div style={style}>{message}</div>
+      <div style={style} className={className}>{message}</div>
     )
   }
   return null
@@ -20,7 +20,7 @@ const InfoNotification = ({ message, setter }) => {
     padding: 10,
     marginBottom: 10,
   }
-  return getNotification(message, notificationStyle, setter)
+  return getNotification(message, notificationStyle, setter, className="info")
 }
 
 const ErrorNotification = ({ message, setter }) => {
@@ -33,7 +33,7 @@ const ErrorNotification = ({ message, setter }) => {
     padding: 10,
     marginBottom: 10,
   }
-  return getNotification(message, notificationStyle, setter)
+  return getNotification(message, notificationStyle, setter, className="error")
 }
 
 export { InfoNotification, ErrorNotification }
