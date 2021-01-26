@@ -20,7 +20,7 @@ const InfoNotification = ({ message, setter }) => {
     padding: 10,
     marginBottom: 10,
   }
-  return getNotification(message, notificationStyle, setter, className="info")
+  return getNotification(message, notificationStyle, setter, "info")
 }
 
 const ErrorNotification = ({ message, setter }) => {
@@ -33,7 +33,7 @@ const ErrorNotification = ({ message, setter }) => {
     padding: 10,
     marginBottom: 10,
   }
-  return getNotification(message, notificationStyle, setter, className="error")
+  return getNotification(message, notificationStyle, setter, "error")
 }
 
 export { InfoNotification, ErrorNotification }
