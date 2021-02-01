@@ -7,11 +7,18 @@ export const setMessage = (message) => {
   }
 }
 
+export const clearMessage = () => {
+  return {
+    type: 'CLEAR_MESSAGE'
+  }
+}
+
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SET_MESSAGE':
-      const message = action.data.message
-      return message
+      return action.data.message
+    case 'CLEAR_MESSAGE':
+      return ''
     default: return state
   }
 }
