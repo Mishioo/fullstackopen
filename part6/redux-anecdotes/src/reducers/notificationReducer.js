@@ -1,13 +1,18 @@
 const initialState = "Hey! I'm here for you!"
 
-export const setMessage = (message) => {
-  return {
-    type: 'SET_MESSAGE',
-    data: { message }  
-  }
+export const setNotification = (message, timeout) => {
+  return async dispatch => {
+    setTimeout(() => {
+      dispatch(clearNotification())
+    }, timeout * 1000)
+    dispatch({
+      type: 'SET_MESSAGE',
+      data: { message }  
+   })
+}
 }
 
-export const clearMessage = () => {
+export const clearNotification = () => {
   return {
     type: 'CLEAR_MESSAGE'
   }
