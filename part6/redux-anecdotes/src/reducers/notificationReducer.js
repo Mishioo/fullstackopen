@@ -1,29 +1,32 @@
-const initialState = "Hey! I'm here for you!"
+const initialState = { message: '', timeoutID: '' }
 
 export const setNotification = (message, timeout) => {
   return async dispatch => {
-    setTimeout(() => {
+    const timeoutID = setTimeout(() => {
       dispatch(clearNotification())
     }, timeout * 1000)
     dispatch({
       type: 'SET_MESSAGE',
-      data: { message }  
+      data: { message, timeoutID }  
    })
 }
 }
 
 export const clearNotification = () => {
-  return {
-    type: 'CLEAR_MESSAGE'
+  return async dispatch => {
+    dispatch( {type: 'CLEAR_MESSAGE'} )
   }
 }
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SET_MESSAGE':
-      return action.data.message
+      if (state.timeoutID) {
+        clearTimeout(state.timeoutID)
+      }
+      return action.data
     case 'CLEAR_MESSAGE':
-      return ''
+      return { message: '', timeoutID: '' }
     default: return state
   }
 }
