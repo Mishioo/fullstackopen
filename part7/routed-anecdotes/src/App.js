@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
   useRouteMatch,
-  Route, Switch, Link
+  Route, Switch, Link, Redirect
 } from 'react-router-dom'
 
 const Menu = () => {
@@ -60,11 +60,23 @@ const Footer = () => (
   </div>
 )
 
+const Notification = ({ message, setMessage }) => {
+  if (message) {
+    setTimeout(() => setMessage(null), 10000)
+    return <div>A new anecdote {message} created!</div>
+  }
+  return null
+}
+
 const CreateNew = (props) => {
   const [content, setContent] = useState('')
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
+  const [toHome, setToHome] = useState(false)
 
+  if (toHome) {
+    return <Redirect to='/' />
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -74,12 +86,14 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+    props.setMessage(content)
+    setToHome(true)
   }
 
   return (
     <div>
       <h2>create a new anecdote</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} >
         <div>
           content
           <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
@@ -96,7 +110,6 @@ const CreateNew = (props) => {
       </form>
     </div>
   )
-
 }
 
 const App = () => {
@@ -145,12 +158,13 @@ const App = () => {
     <div>
       <h1>Software anecdotes</h1>
       <Menu />
+      <Notification message={notification} setMessage={setNotification} />
       <Switch>
         <Route path="/about">
           <About />
         </Route>
         <Route path="/create">
-          <CreateNew addNew={addNew} />
+          <CreateNew addNew={addNew} setMessage={setNotification} />
         </Route>
         <Route path="/anecdotes/:id">
           <Anecdote anecdote={anecdote}/>
